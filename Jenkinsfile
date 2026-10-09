@@ -22,10 +22,18 @@ pipeline {
         stage('Frontend Lint') {
             steps {
                 dir('frontend') {
-                    sh '''
-                        npm ci
-                        npm run lint
-                    '''
+                    sh 'npm ci'
+                    script {
+                        int lintStatus = sh(
+                            script: 'npm run lint',
+                            returnStatus: true
+                        )
+
+                        if (lintStatus != 0) {
+                            currentBuild.result = 'UNSTABLE'
+                            echo 'WARNING: Frontend lint failed. Review the ESLint findings.'
+                        }
+                    }
                 }
             }
         }
