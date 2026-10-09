@@ -1,3 +1,4 @@
+```groovy
 pipeline {
     agent any
 
@@ -45,5 +46,25 @@ pipeline {
                 }
             }
         }
+
+        stage('SonarQube Analysis') {
+            environment {
+                SONAR_TOKEN = credentials('sonar-token')
+            }
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                        /opt/sonar-scanner/bin/sonar-scanner \
+                          -Dsonar.projectKey=nutriflow \
+                          -Dsonar.projectName=NutriFlow \
+                          -Dsonar.sources=backend,frontend/src \
+                          -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/** \
+                          -Dsonar.host.url=http://localhost:9000 \
+                          -Dsonar.token="$SONAR_TOKEN"
+                    '''
+                }
+            }
+        }
     }
 }
+```
