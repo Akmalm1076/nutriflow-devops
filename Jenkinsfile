@@ -4,19 +4,37 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                echo 'Checking out NutriFlow source code'
+                echo 'NutriFlow source code checked out from GitHub'
             }
         }
 
-        stage('Build') {
+        stage('Backend Validation') {
             steps {
-                echo 'Building NutriFlow application'
+                dir('backend') {
+                    sh '''
+                        npm ci --omit=dev
+                        node --check index.js
+                    '''
+                }
             }
         }
 
-        stage('Test') {
+        stage('Frontend Lint') {
             steps {
-                echo 'Running tests'
+                dir('frontend') {
+                    sh '''
+                        npm ci
+                        npm run lint
+                    '''
+                }
+            }
+        }
+
+        stage('Frontend Build') {
+            steps {
+                dir('frontend') {
+                    sh 'npm run build'
+                }
             }
         }
     }
